@@ -171,7 +171,6 @@ jobs:
           fingerprints: ["ee:a7:60:a0:bc:0e:d2:f6:15:5f:1f:1c:55:fb:5b:0a"]
       - attach_workspace:
           at: ~/
-      - run: yum install -y tar gzip
       - install_awscli
       - run:
           name: install ansible
