@@ -16,6 +16,17 @@ commands:
             aws s3 rm s3://udapeople-prod-<<parameters.workflow_id>> --recursive
             aws cloudformation delete-stack --stack-name udapeople-frontend-prod-<<parameters.workflow_id>>
 
+  install_awscli:
+    description: install awscli v2
+    steps:
+      - run: 
+          name: install awscli v2
+          command: |
+            sudo apt update && sudo apt upgrade
+            sudo apt install curl 
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
 jobs:
   build-frontend:
     docker:
@@ -141,7 +152,6 @@ jobs:
               --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text)
-            echo "[all]" >> .circleci/ansible/inventory.txt
             echo "$BACKEND_AWS_PUBLIC_IP" >> .circleci/ansible/inventory.txt
             cat .circleci/ansible/inventory.txt
       - persist_to_workspace:
@@ -151,6 +161,33 @@ jobs:
       # Here's where you will add some code to rollback on failure
       - destroy_environment:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"    
+
+  configure-infrastructure:
+    docker:
+      - image: cimg/base:2022.04
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: ["ee:a7:60:a0:bc:0e:d2:f6:15:5f:1f:1c:55:fb:5b:0a"]
+      - attach_workspace:
+          at: ~/
+      - run: yum install -y tar gzip
+      - install_awscli
+      - run:
+          name: install ansible
+          command: |
+            sudo apt update
+            sudo apt install software-properties-common -y 
+            sudo add-apt-repository --yes --update ppa:ansible/ansible
+            sudo apt install ansible -y
+      - run:
+          name: Configure server
+          command: |
+            cd .circleci/ansible
+            cat inventory.txt
+            ansible-playbook -i inventory.txt configure-server.yml
+      - destroy-environment:
+            workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"      
 
 
 workflows:
@@ -171,8 +208,8 @@ workflows:
       #     filters:
       #       branches:
       #         only: [test-feature-branch]
-      # - configure-infrastructure:
-      #     requires: [deploy-infrastructure]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
       # - run-migrations:
       #     requires: [configure-infrastructure]
       # - deploy-frontend:
