@@ -14,8 +14,27 @@ commands:
           command: |
             echo "Destroying environment: <<parameters.workflow_id>> "
             aws cloudformation delete-stack --stack-name udapeople-backend-prod-<<parameters.workflow_id>>
-            aws s3 rm s3://udapeople-prod-<<parameters.workflow_id>> --recursive
             aws cloudformation delete-stack --stack-name udapeople-frontend-prod-<<parameters.workflow_id>>
+            aws s3 rm s3://udapeople-<<parameters.workflow_id>> --recursive
+
+  revert-migrations:
+    description: Revert the last migration if successful
+    parameters:
+      workflow_id:
+        type: string
+        default: "${CIRCLE_WORKFLOW_ID:0:7}"
+    steps:
+      - run:
+          name: revert migrations
+          when: on_fail
+          command: |
+            SUCCESS=$(curl --insecure https://kvdb.io/Btyig2X8ehJdkoEV9tANwz/migration_<< parameters.workflow_id >>)
+            if (( $SUCCESS == 1 ));
+            then 
+             cd ~/project/backend
+             npm install
+             npm run migration:revert
+            fi
 
   install_awscli:
     description: install awscli v2
@@ -171,7 +190,6 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-      # Here's where you will add some code to rollback on failure
       - destroy_environment
 
   configure-infrastructure:
@@ -214,7 +232,7 @@ jobs:
             cd backend
             npm install
             npm audit fix --audit-level=critical --force
-            npm audit --audit-level=critical 
+            npm audit fix --force
             npm run migrations > migrations_dump.txt
       - run:
           name: Send migration results to kvdb.io
