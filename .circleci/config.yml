@@ -28,6 +28,18 @@ commands:
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
             unzip awscliv2.zip
             sudo ./aws/install
+
+  install_nodejs:
+    description: install nodejs
+    steps: 
+      - run: 
+          name: install nodejs
+          command: |
+            sudo apt update && sudo apt upgrade
+            sudo apt install curl 
+            curl -fsSl https://deb.nodesource.com/setup_13.x | sudo -E bash -
+            sudo apt install -y nodejs
+            
 jobs:
   build-frontend:
     docker:
@@ -198,6 +210,7 @@ jobs:
       - run:
           name: Run migrations
           command: |
+            set -e
             cd backend
             npm install 
             npm run migrations > migrations_dump.txt
@@ -209,6 +222,32 @@ jobs:
                 curl https://kvdb.io/Btyig2X8ehJdkoEV9tANwz/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
       - destroy_environment
+
+  deploy-frontend:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - install_awscli
+      - install_nodejs
+      - run:
+          name: Install dependencies
+          command: |
+            cd frontend
+            npm install
+      - run:
+          name: Get backend url
+          command: |
+            # your code here
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "${API_URL}"
+      - run:
+          name: Deploy frontend objects
+          command: |
+            # your code here
+      # Here's where you will add some code to rollback on failure  
 
 workflows:
   default:
