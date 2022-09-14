@@ -19,3 +19,15 @@
     global: yes
     production: yes
     state: present
+
+- name: add nodejs from Nodesource
+  become: true
+  shell: |
+    get_url -sL https://deb.nodesource.com/setup_13.x | sudo -E bash -
+
+- name: install n node version manager
+  become: yes
+  npm:
+    name: n
+    global: yes
+    production: yes
