@@ -214,12 +214,12 @@ jobs:
           command: |
             cd .circleci/ansible
             cat inventory.txt
-            cat $TYPEORM_CONNECTION
-            cat $TYPEORM_HOST
-            cat $TYPEORM_PORT
-            cat $TYPEORM_DATABASE
-            cat $TYPEORM_USERNAME
-            cat $TYPEORM_PASSWORD
+            cat TYPEORM_CONNECTION
+            cat TYPEORM_HOST
+            cat TYPEORM_PORT
+            cat TYPEORM_DATABASE
+            cat TYPEORM_USERNAME
+            cat TYPEORM_PASSWORD
             ansible-playbook -i inventory.txt configure-server.yml --extra-vars "_TYPEORM_CONNECTION=$TYPEORM_CONNECTION _TYPEORM_ENTITIES=$TYPEORM_ENTITIES _TYPEORM_HOST=$TYPEORM_HOST _TYPEORM_PORT=$TYPEORM_PORT _TYPEORM_USERNAME=$TYPEORM_USERNAME _TYPEORM_PASSWORD=$TYPEORM_PASSWORD _TYPEORM_DATABASE=$TYPEORM_DATABASE _TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS _TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR"
       - destroy_environment    
 
