@@ -225,15 +225,12 @@ jobs:
       - install_awscli
       - restore_cache:
           keys: [backend-build]
-      - attach_workspace:
-          at: ~/
       - run:
           name: Run migrations
           command: |
-            set -e
             cd backend
             npm install
-            npm run migrations >> migration_output.txt
+            npm run migrations > migration_output.txt
             cat migration_output.txt
       - run:
           name: Send migration results to kvdb.io
