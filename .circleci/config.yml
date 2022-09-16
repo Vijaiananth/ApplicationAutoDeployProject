@@ -336,12 +336,9 @@ jobs:
             curl -fsSl https://deb.nodesource.com/setup_12.x | sudo -E bash -
             sudo apt install -y nodejs
       - run:
-          name: Get backend url
-          command: |
-            BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" --output text)
-      - run:
           name: Backend smoke test.
           command: |
+            BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" --output text)
             export API_URL=http://${BACKEND_IP}:3030
             if curl -s ${API_URL}/api/status | grep "ok"
             then
@@ -362,6 +359,31 @@ jobs:
             fi
       - destroy_environment
       - revert-migrations
+
+  cloudfront-update:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run: 
+          name: install nodejs
+          command: |
+            sudo apt update && sudo apt upgrade
+            sudo apt install curl 
+            curl -fsSl https://deb.nodesource.com/setup_12.x | sudo -E bash -
+            sudo apt install -y nodejs
+      - run:
+          name: Update cloudfront distribution
+          command: |
+            
+            aws cloudformation deploy \
+              --template-file .circleci/files/cloudfront.yml \
+              --stack-name InitialStack \
+              --parameter-overrides WorkflowID="udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --tags project=udapeople
+      - destroy_environment
+      - revert-migrations
+
 
 workflows:
   default:
@@ -391,7 +413,7 @@ workflows:
           requires: [run-migrations]
       - smoke-test:
           requires: [deploy-backend, deploy-frontend]
-      # - cloudfront-update:
-      #     requires: [smoke-test]
+      - cloudfront-update:
+          requires: [smoke-test]
       # - cleanup:
       #     requires: [cloudfront-update]
