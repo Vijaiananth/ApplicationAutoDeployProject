@@ -369,13 +369,6 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
-      - run: 
-          name: install nodejs
-          command: |
-            sudo apt update && sudo apt upgrade
-            sudo apt install curl 
-            curl -fsSl https://deb.nodesource.com/setup_12.x | sudo -E bash -
-            sudo apt install -y nodejs
       - run:
           name: Update cloudfront distribution
           command: |
