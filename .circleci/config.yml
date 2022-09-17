@@ -219,7 +219,7 @@ jobs:
       - run:
           name: Configure prometheus node exporter
           command: |
-            ansible-playbook -i inventory.txt configure-prometheus.yml
+            ansible-playbook -i inventory.txt configure-prometheus-node.yml
       
       - destroy_environment    
 
