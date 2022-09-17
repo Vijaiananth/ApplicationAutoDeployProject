@@ -393,14 +393,11 @@ jobs:
           command: |
             # Fetch the Old workflow ID
             export OldWorkflowID=$(aws cloudformation \
-            describe-stacks --query 'Stacks[?StackName!=`InitialStack`].{name:StackName, time:CreationTime} | sort_by([], &time) | [0].name' --output text | cut -d- -f3)
+            describe-stacks --query 'Stacks[?StackName!=`InitialStack`].{name:StackName, time:CreationTime} | sort_by([], &time) | [0].name' --output text)
             echo OldWorkflowID: "${OldWorkflowID}"
             echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"
             echo Back End Stack name: udapeople-backend-"${OldWorkflowID}"
             echo Front End Stack name: udapeople-frontend-"${OldWorkflowID}"
-      - run:
-          name: Remove old stacks and files
-          command: |
             if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OldWorkflowID}" ]]
             then
               aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
