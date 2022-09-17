@@ -10,9 +10,11 @@
 
   3. Public URL for your CloudFront distribution (aka, your blue blue production front-end) [URL03]
 
+      http://d3l8ofkvip0g4u.cloudfront.net/#/employees 
 
   4. Public URLs to deployed application back-end in EC2 [URL04]
 
+      http://34.207.92.194:3030/api/status 
 
   5. Public URL to your Prometheus Server [URL05]
 
