@@ -221,7 +221,7 @@ jobs:
           command: |
             cd .circleci/ansible
             echo inventory.txt
-            ansible-playbook -i inventory.txt configure-prometheus-node.yml configure-prometheus-node
+            ansible-playbook -i inventory.txt configure-prometheus-node.yml
       
       - destroy_environment    
 
